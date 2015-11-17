@@ -16,7 +16,7 @@ classdef Beamclass
         nm; %refractive index of medium, scalar 1xn
     end
     methods
-        function obj = Beamclass(r,v,t,wavelength,polarization,E0,ID,dist,nm)
+        function obj = Beamclass(varargin) %r,v,t,wavelength,polarization,E0,ID,dist,nm
             switch nargin
                 case 0
                     obj.r = [];
@@ -28,16 +28,16 @@ classdef Beamclass
                     obj.ID = [];
                     obj.dist = 0;
                     obj.nm = 0;
-                otherwise
-                    obj.r = r;
-                    obj.v = v;
-                    obj.t = t;
-                    obj.wavelength = wavelength;
-                    obj.polarization = polarization;
-                    obj.E0 = E0;
-                    obj.ID = ID;
-                    obj.dist = dist;
-                    obj.nm = nm;
+                case 9
+                    obj.r = varargin{1};
+                    obj.v = varargin{2};
+                    obj.t = varargin{3};
+                    obj.wavelength = varargin{4};
+                    obj.polarization = varargin{5};
+                    obj.E0 = varargin{6};
+                    obj.ID = varargin{7};
+                    obj.dist = varargin{8};
+                    obj.nm = varargin{9};
             end
         end
         
