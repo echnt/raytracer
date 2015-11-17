@@ -8,7 +8,9 @@ v = [1;0;0];
 v = v/norm(v);
 r = [-0.2;0;0];
 beamDiameter = 18e-3;
-N = [100,2];
+Nr = 100;
+Np = 2;
+N = [Nr,Np];
 E = 1;
 pol = 0;
 l0 = 800e-9;
@@ -40,16 +42,8 @@ phi = [0;0;45];
 OO(3) = mirror_template(w,d,h,[n_in,n_out],opticalInteractionType,phi,center);
 opticalInteractionType = {'refraction','reflrefr'};
 center = [0.5;-0.5;0];
-phi = [0;0;45];
+phi = [0;1;45];
 OO(4) = mirror_template(w,d,h,[n_in,n_out],opticalInteractionType,phi,center);
-
-%% delay glass
-
-d = 1e-3;
-opticalInteractionType = {'refraction','refraction'};
-center = [0.2;0;0];
-phi = [0;0;0];
-OO(5) = mirror_template(w,d,h,[n_in,n_out],opticalInteractionType,phi,center);
 
 %% detection
 geometry.radius = 50e-3;
@@ -85,10 +79,34 @@ axis equal;
 view(0,90);
 
 figure(2);
+subplot(2,1,1);
 S = OO(length(OO)).optElements(1).ID == beam.ID & beam.t > 0;
-plot(beam.dist(S)-min(beam.dist(S)),'.');
-xlabel('beam index');
-ylabel('optical delay by glass /m');
-title(sprintf('Path Difference with a %3.1fmm glass',d*1e3));
+D = beam.dist(S) + MV3norm(beam.r(:,S) + beam.v(:,S).*repmat(beam.t(S),3,1));
+r1 = D(1:Nr*Np);
+r2 = D(Nr*Np+1:2*Nr*Np);
+y = beam.r(2,S);
+y = y(1:Nr*Np);
+y = y-mean(y);
+wl = beam.wavelength(S);
+wl = wl(1:Nr*Np);
+E0 = beam.E0(S);
+E0 = E0(1:Nr*Np);
+
+plot(y*1e3,(r1-r2)*1e6,'.');
+xlabel('r(beam line out) /mm');
+ylabel('optical path difference /mu m');
+title(sprintf('Path Difference with misaligned beam splitter'));
 grid on;
 drawnow;
+
+subplot(2,1,2);
+E = E0.*exp(1i * 2*pi./wl .* (r1-r2));
+[y,I] = sort(y);
+E = E(I);
+E0 = E0(I);
+
+plot(y*1e3,(E+E0).*conj(E+E0),'.-',y*1e3,E0.*conj(E0));
+xlabel('r(beam line out) /mm');
+ylabel('Intensity');
+grid on;
+legend('Interference','Initial beam');
